@@ -49,9 +49,9 @@ public class Customer {
 
         Customer customer = (Customer) o;
 
-        if (id != customer.id) return false;
-        if (scores != customer.scores) return false;
-        return name != null ? name.equals(customer.name) : customer.name == null;
+        if (this.id != customer.getId()) return false;
+        if (this.scores != customer.getScores()) return false;
+        return this.name != null ? this.name.equals(customer.getName()) : customer.getName() == null;
     }
 
     @Override
