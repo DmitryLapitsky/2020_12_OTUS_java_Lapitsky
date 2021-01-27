@@ -37,7 +37,7 @@ public class CustomerService {
         Map.Entry<Customer, String> firstEntry = map.firstEntry();
             Customer smallesCustomer = new Customer(firstEntry.getKey().getId(), firstEntry.getKey().getName(), firstEntry.getKey().getScores());
             String info = firstEntry.getValue();
-            return new Map.Entry<>() {
+            return new Map.Entry<Customer, String>() {
                 @Override
                 public Customer getKey() {
                     return smallesCustomer;
