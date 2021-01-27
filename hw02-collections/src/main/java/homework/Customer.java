@@ -50,7 +50,10 @@ public class Customer {
         Customer customer = (Customer) o;
 
         if (this.id != customer.getId()) return false;
-        if (this.scores != customer.getScores()) return false;
+        /**
+         * equals и hash должны работать по одним полям
+         */
+//        if (this.scores != customer.getScores()) return false;
         return this.name != null ? this.name.equals(customer.getName()) : customer.getName() == null;
     }
 
