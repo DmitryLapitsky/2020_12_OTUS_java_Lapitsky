@@ -7,24 +7,24 @@ import java.util.List;
 
 public class TestFrameWork {
 
-    static Object[] constructorArgs;
-    String className;
-
-    //два конструктора тестера - с аргументами и без
-    public TestFrameWork(String className, Object... args) {
-        this.className = className;
-        constructorArgs = args;
+    public static void main(String[] args)  {
+        System.out.println("test " + Arrays.toString(args));
+        for(String classNmae : args){
+            try {
+                System.out.println("->" + classNmae);
+                TestFrameWork testFrameWork = new TestFrameWork();
+                String result = testFrameWork.run(classNmae);
+                System.out.println(result);
+            }catch (Exception e){
+                System.out.println(classNmae + " test was not initiated. Cause: " + e.toString());
+            }
+        }
     }
 
-    public TestFrameWork(String className) {
-        this.className = className;
-        constructorArgs = new Object[]{};
-    }
 
-    public static void main(String[] args) throws ClassNotFoundException {
-        TestFrameWork diy = new TestFrameWork("DemoClass", "2", 0);
-        Class<?> tester = Class.forName(diy.className);
-
+    public String run(String className) throws ClassNotFoundException {
+        Class<?> tester = Class.forName(className);
+        System.out.println(tester.getTypeName());
         Method[] testedClassMethods = tester.getDeclaredMethods();
         List<Method> beforeMethods = new ArrayList<>();
         List<Method> afterMethods = new ArrayList<>();
@@ -46,7 +46,7 @@ public class TestFrameWork {
         boolean classTestTotalResult = true;        //общий результат тестирования класса
         int failedTests = 0;
         for (Method testMethod : testMethods) {     //проходим по всем методам с меткой @Test
-            Object testedClass = instantiate(tester, constructorArgs);//создаем отдельный экземпляр тестируемого класса
+            Object testedClass = instantiate(tester);//создаем отдельный экземпляр тестируемого класса
             System.out.println("***** Testing {" + testMethod.getName() + "} *****");
             boolean testPass = true;              //
             String beforeTempMethod = null;
@@ -81,7 +81,7 @@ public class TestFrameWork {
                 failedTests++;
             System.out.println(testPass + " *****\n");
         }
-        System.out.println("Class test result: " + classTestTotalResult + ". Passed " + (testMethods.size() - failedTests) + " from " + testMethods.size());
+        return tester.getName() + " test result: " + classTestTotalResult + ". Passed " + (testMethods.size() - failedTests) + " from " + testMethods.size();
     }
 
     public static void callMethod(Object object, Method method) throws InvocationTargetException, IllegalAccessException {//вызов метода, предварительно изменив его видимость
@@ -91,41 +91,17 @@ public class TestFrameWork {
 
     /**
      * инициализирует экземпляр класса по типу и передаваемым аргументам. Если аргумены с параметрами конструктора класса не совпадут, то ошибка с выводом возможных конструкторов класса
+     *
      * @param type класс вызываемого объекта
-     * @param args аргументы вызова, которые будут сравниваться с параметрами конструктора класса
-     * @param <T> тип возвращаемого класса
+     * @param <T>  тип возвращаемого класса
      * @return экземляр класса
      */
-    public static <T> T instantiate(Class<T> type, Object... args) {    //вызов эземпляра класса, предварительно изменив его видимость
+    public static <T> T instantiate(Class<T> type) {    //вызов эземпляра класса, предварительно изменив его видимость
         try {
-            Class<?>[] classes = new Class[args.length];
-            Arrays.fill(classes, null);
-
-            Constructor<?>[] constructors = type.getConstructors();
-            for (Constructor<?> constructor : constructors) {   //для каждого конструктора
-                constructor.setAccessible(true);
-                if (constructor.getParameterTypes().length == args.length) {//если у конструктора несколько параметров и они их количество такое же, как у передаваемых
-                    if (args.length > 0) {//если передано несколько аргументов, то в конструкторах ищем совпадения и заполняем Class<?>[] classes
-                        for (int i = 0; i < args.length; i++) {
-                            Class<?> classElement = constructor.getParameterTypes()[i];
-                            if (args[i].getClass().toString().toLowerCase().contains(classElement.getTypeName().toLowerCase())) { //пробовал args[i].getClass().isInstance(classElement), но не сработало, использовал текстовое представление классов
-                                classes[i] = classElement;
-                            } else {//если несовпадение, то обнуляем массив типов и все заново
-                                Arrays.fill(classes, null);
-                                break;
-                            }
-                        }
-                        if (classes[args.length - 1] != null) {//если последний элемент заполнен, то все хорошо
-                            return type.getDeclaredConstructor(classes).newInstance(args);
-                        }
-                    } else { //если количество передаваемых аргументов параметров конструктора = 0
-                        return type.getDeclaredConstructor().newInstance();
-                    }
-                }
-            }
-            throw new RuntimeException("No sutable construction for args " + Arrays.toString(args) + ". Available constructors " + Arrays.toString(constructors));
+            return type.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            System.out.println("!!!!!!"+type.getTypeName());
+            throw new RuntimeException("Failed to load class: " + type.getName() + ". Cause: " + e.toString());
         }
     }
 }

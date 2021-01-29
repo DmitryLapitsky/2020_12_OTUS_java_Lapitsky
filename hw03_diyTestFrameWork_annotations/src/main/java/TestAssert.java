@@ -4,13 +4,17 @@ public class TestAssert {
         int c = current == null ? 1 : 0;
         int e = expected == null ? 1 : 0;
         if (c + e == 1) {
-            System.out.println("\tError 1\n\tExpected " + expected + "\n\tCurrent " + current + "\n\t" + errorMessage);
-            throw new Error();
+            throw new AssertException( expected,  current,  errorMessage);
         } else if (current != null && !current.equals(expected)) {
-            System.out.println("\tError 2\n\tExpected " + expected + "\n\tCurrent " + current + "\n\t" + errorMessage);
-            throw new Error();
+            throw new AssertException(expected, current, errorMessage);
         }
+    }
 
+    static class AssertException extends RuntimeException {
 
+        public AssertException(Object expected, Object current, String errorMessage) {
+            String error = "\tTest error\n\tExpected " + expected + "\n\tCurrent " + current + "\n\t" + errorMessage;
+            System.out.println(error);
+        }
     }
 }
