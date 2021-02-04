@@ -1,6 +1,5 @@
 package gc.bench;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +18,7 @@ class Benchmark implements gc.bench.BenchmarkMBean {
 
     @Override
     public void setSize(int size) {
-        System.out.println("new size:" + size);
+        System.out.println("new size: " + size);
         this.size = size;
     }
 

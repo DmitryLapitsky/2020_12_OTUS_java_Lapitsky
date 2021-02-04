@@ -58,7 +58,7 @@ oom для 1024 получить не удалось с теми же парам
 
 ######-XX:+UseParallelGC
 
-|Test time [s]|number of objects before fail / 15000| objects per sec |
+|Test time [s] |number of objects before fail / 15000| objects per sec |
 | ------------- | ------------- | ------------- | 
 |293|190036|648.5870307|
 |284|190036|669.1408451|

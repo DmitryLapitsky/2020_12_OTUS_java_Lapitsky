@@ -17,7 +17,6 @@ import javax.management.openmbean.CompositeData;
 О формате логов
 http://openjdk.java.net/jeps/158
 
-
 -Xms512m
 -Xmx512m
 -Xlog:gc=debug:file=./logs/gc-%p-%t.log:tags,uptime,time,level:filecount=5,filesize=10m
