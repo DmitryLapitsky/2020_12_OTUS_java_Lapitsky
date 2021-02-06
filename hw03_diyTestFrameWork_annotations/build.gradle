@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow'
+}
+
+sourceCompatibility = JavaVersion.VERSION_15
+targetCompatibility = JavaVersion.VERSION_15
+
+mainClassName = "TestFrameWork"
+
+shadowJar {
+    archiveBaseName.set('TestFrameWork')
+    archiveVersion.set('0.1')
+    archiveClassifier.set('')
+    manifest {
+        attributes 'Main-Class': 'TestFrameWork'
+    }
+}
+
+tasks.build.dependsOn tasks.shadowJar
+
+task execute(type: JavaExec) {
+    main = "TestFrameWork"
+    classpath = sourceSets.main.runtimeClasspath
+    args 'DemoClass', 'DemoClass'
+    println(args)
+}
