@@ -1,31 +1,61 @@
-import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+package testFrameWork;
 
+import java.lang.reflect.*;
+import java.util.*;
 
 public class TestFrameWork {
 
-    public static void main(String[] args)  {
-        System.out.println("test " + Arrays.toString(args));
-        for(String classNmae : args){
-            try {
-                System.out.println("->" + classNmae);
-                TestFrameWork testFrameWork = new TestFrameWork();
-                String result = testFrameWork.run(classNmae);
-                System.out.println(result);
-            }catch (Exception e){
-                System.out.println(classNmae + " test was not initiated. Cause: " + e.toString());
+    private boolean testTotal = true;
+    private Map<String, Map<Boolean, String>> classResult = new HashMap<>();//классы, методы(результаты, ошибки)
+    private String className;
+
+    public String toString() {
+        StringBuilder out = new StringBuilder();
+        out.append("class: ").append(className).append(" test: ").append(testTotal).append("\n");
+        int methodsCount = classResult.size();
+        int failedTests = 0;
+        out.append("\ttested methods:").append(classResult.keySet()).append("\n");
+        for (Map.Entry<String, Map<Boolean, String>> method : classResult.entrySet()) {
+            for (Map.Entry<Boolean, String> methodRes : method.getValue().entrySet()) {
+                if (methodRes.getKey()) {
+                    out.append(method.getKey()).append(" -> ").append(true).append("\n");
+                } else {
+                    out.append(method.getKey()).append(" -> ").append(false).append("\tCause:").append(methodRes.getValue()).append("\n");
+                    failedTests++;
+                }
             }
         }
+        out.append("\n\ttested methods:").append(methodsCount).append(" passed:").append(methodsCount - failedTests).append(" failed:").append(failedTests).append("\n");
+        return out.toString();
     }
 
+    public int getFailed() {
+        int failedTests = 0;
+        for (Map.Entry<String, Map<Boolean, String>> method : classResult.entrySet()) {
+            for (Map.Entry<Boolean, String> methodRes : method.getValue().entrySet()) {
+                if (!methodRes.getKey()) {
+                    failedTests++;
+                }
+            }
+        }
+        return failedTests;
+    }
 
-    public String run(String className) throws ClassNotFoundException {
-        Class<?> tester = Class.forName(className);
-        System.out.println(tester.getTypeName());
-        Method[] testedClassMethods = tester.getDeclaredMethods();
+    public int getTestsCount() {
+        return classResult.size();
+    }
+
+    public static void main(String[] args) throws ClassNotFoundException {
+        TestFrameWork tf = new TestFrameWork();
+        tf.run("testFrameWork.DemoClass");
+        System.out.println(tf.toString());
+    }
+
+    public TestFrameWork run(String className) throws ClassNotFoundException {
+        this.className = className;
+        Class<?> classTested = Class.forName(className);
+        System.out.println(classTested.getTypeName());
+        Method[] testedClassMethods = classTested.getDeclaredMethods();
         List<Method> beforeMethods = new ArrayList<>();
         List<Method> afterMethods = new ArrayList<>();
         List<Method> testMethods = new ArrayList<>();
@@ -43,13 +73,12 @@ public class TestFrameWork {
         }
         Collections.shuffle(testMethods);           //тесты каждый раз будут в случайном порядке
 
-        boolean classTestTotalResult = true;        //общий результат тестирования класса
-        int failedTests = 0;
         for (Method testMethod : testMethods) {     //проходим по всем методам с меткой @Test
-            Object testedClass = instantiate(tester);//создаем отдельный экземпляр тестируемого класса
+            Object testedClass = instantiate(classTested);//создаем отдельный экземпляр тестируемого класса
             System.out.println("***** Testing {" + testMethod.getName() + "} *****");
-            boolean testPass = true;              //
+            boolean methodTestPass = true;              //
             String beforeTempMethod = null;
+            String methodTestError = "no error";
             try {                                   //в одном блоке вначале методы before, затем test, т.к. какая разница, что сломается
                 for (Method beforeMethod : beforeMethods) { //подготовительных методов может быть несколько
                     beforeTempMethod = beforeMethod.getName();
@@ -59,29 +88,34 @@ public class TestFrameWork {
                     callMethod(testedClass, testMethod);
                 } catch (Exception e) {
                     System.out.println("Test Method Exception in " + testMethod.getName() + " " + e.getCause());
-                    testPass = false;
+                    methodTestError = "Test Method Exception in " + testMethod.getName() + " " + e.getCause();
+                    methodTestPass = false;
                 }
             } catch (Exception e) {
                 System.out.println("Before Method Exception in " + beforeTempMethod + " " + e.getCause());
-                testPass = false;
+                methodTestError = "Before Method Exception in " + beforeTempMethod + " " + e.getCause();
+                methodTestPass = false;
             } finally {                             //выполнить всегда метод after
                 for (Method afterMethod : afterMethods) {
                     try {
                         callMethod(testedClass, afterMethod);
                     } catch (Exception e) {
                         System.out.println("After Method Exception in " + afterMethod.getName() + " " + e.getCause());
-                        testPass = false;         //т.к.
+                        methodTestError = "After Method Exception in " + beforeTempMethod + " " + e.getCause();
+                        methodTestPass = false;         //т.к. тест все равно не пройден
                     }
                 }
-                if (classTestTotalResult) {
-                    classTestTotalResult = testPass;
+                if (testTotal) {
+                    testTotal = methodTestPass;
                 }
             }
-            if (!testPass)
-                failedTests++;
-            System.out.println(testPass + " *****\n");
+            System.out.println(methodTestPass + " *****\n");
+
+            Map<Boolean, String> methodTestResult = new HashMap<>();
+            methodTestResult.put(methodTestPass, methodTestError);
+            classResult.put(testMethod.getName(), methodTestResult);
         }
-        return tester.getName() + " test result: " + classTestTotalResult + ". Passed " + (testMethods.size() - failedTests) + " from " + testMethods.size();
+        return this;
     }
 
     public static void callMethod(Object object, Method method) throws InvocationTargetException, IllegalAccessException {//вызов метода, предварительно изменив его видимость
@@ -100,7 +134,7 @@ public class TestFrameWork {
         try {
             return type.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            System.out.println("!!!!!!"+type.getTypeName());
+            System.out.println("!!!!!!" + type.getTypeName());
             throw new RuntimeException("Failed to load class: " + type.getName() + ". Cause: " + e.toString());
         }
     }

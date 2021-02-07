@@ -1,3 +1,5 @@
+package testFrameWork;
+
 public class DemoClass {
 
     private String test1Value = "no";
