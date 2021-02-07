@@ -7,22 +7,22 @@ plugins {
 sourceCompatibility = JavaVersion.VERSION_15
 targetCompatibility = JavaVersion.VERSION_15
 
-mainClassName = "TestFrameWork"
+mainClassName = "testFrameWork.TestFrameWork"
 
 shadowJar {
-    archiveBaseName.set('TestFrameWork')
+    archiveBaseName.set('TestRunner')
     archiveVersion.set('0.1')
     archiveClassifier.set('')
     manifest {
-        attributes 'Main-Class': 'TestFrameWork'
+        attributes 'Main-Class': 'testFrameWork.TestRunner'
     }
 }
 
 tasks.build.dependsOn tasks.shadowJar
 
 task execute(type: JavaExec) {
-    main = "TestFrameWork"
+    main = "testFrameWork.TestRunner"
     classpath = sourceSets.main.runtimeClasspath
-    args 'DemoClass', 'DemoClass'
+    args 'testFrameWork.DemoClass', 'testFrameWork.DemoClass2'
     println(args)
 }

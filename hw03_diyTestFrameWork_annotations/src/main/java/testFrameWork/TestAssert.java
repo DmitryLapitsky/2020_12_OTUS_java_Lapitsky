@@ -1,3 +1,5 @@
+package testFrameWork;
+
 public class TestAssert {
 
     static public void checkTrue(Object expected, Object current, String errorMessage) {
