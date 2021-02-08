@@ -28,7 +28,7 @@ class Benchmark implements gc.bench.BenchmarkMBean {
 
     public int getId() {
         int sum = 0;
-        for(int i = 1 ; i<=id;i++){
+        for(int i = 1 ; i<=id ; i++){
             sum += i;
         }
         return sum;
