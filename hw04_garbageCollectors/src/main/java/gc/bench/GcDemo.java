@@ -28,7 +28,7 @@ http://openjdk.java.net/jeps/158
 
 /*
 Serial Collector        -XX:+UseSerialGC
-Parallel Collector      -XX:+UseParallelGC +
+Parallel Collector      -XX:+UseParallelGC
 CMS                     -XX:+UseConcMarkSweepGC
 G1                      -XX:+UseG1GC
 ZGC                     -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
@@ -47,13 +47,14 @@ public class GcDemo {
     static long youngMs = 0;
     static int oldTimes = 0;
     static long oldMs = 0;
+    static long totalTime = 0;
+    static int totalS = 0;
 
     public static void main(String... args) throws Exception {
         long begin = System.currentTimeMillis();
         System.out.println("Starting pid: " + ManagementFactory.getRuntimeMXBean().getName());
         switchOnMonitoring();
-        long beginTime = System.currentTimeMillis();
-        int size = 515000;
+        int size = 15000;
         int loopCounter = 1000_000;
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("ru.otus:type=Benchmark");
@@ -65,12 +66,13 @@ public class GcDemo {
         } finally {
             String msg = "\n" + new SimpleDateFormat("HH:mm").format(new Date());
             msg = msg + "\n" + "Test time " + ((System.currentTimeMillis() - begin) / 1000) + " [s], incremental size: " + benchmark.getSize() + ", stop id:" + benchmark.getId();
+            msg = msg + "\n" + "gc duration:\t" + totalTime + "\t, count:\t" + totalS;
             msg = msg + "\n" + "young count:\t" + youngTimes + "\ttime:" + youngMs;
             msg = msg + "\n" + "old count:\t" + oldTimes + "\ttime:" + oldMs + "\n\n";
             System.out.println(msg);
         }
 
-        System.out.println("time:" + (System.currentTimeMillis() - beginTime) / 1000);
+
     }
 
     private static void switchOnMonitoring() {
@@ -89,6 +91,8 @@ public class GcDemo {
                     long duration = info.getGcInfo().getDuration();
 
                     System.out.println("start:" + startTime + " Name:" + gcName + ", action:" + gcAction + ", gcCause:" + gcCause + "(" + duration + " ms)");
+                    totalTime += duration;
+                    totalS++;
                     if (gcName.contains("Young")) {
                         youngMs += duration;
                         youngTimes++;

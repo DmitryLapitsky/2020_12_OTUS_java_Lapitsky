@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 class Benchmark implements gc.bench.BenchmarkMBean {
+
     private final int loopCounter;
     private volatile int size = 0;
 
@@ -26,7 +27,11 @@ class Benchmark implements gc.bench.BenchmarkMBean {
     private int id = 0;
 
     public int getId() {
-        return id;
+        int sum = 0;
+        for(int i = 1 ; i<=id;i++){
+            sum += i;
+        }
+        return sum;
     }
 
     void getOOM() throws InterruptedException {
