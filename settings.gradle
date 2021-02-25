@@ -3,4 +3,4 @@ include 'hw01-gradle'
 include 'hw02-collections'
 include 'hw03_diyTestFrameWork_annotations'
 include 'hw05_aop'
-
+include 'hw06_solid'
