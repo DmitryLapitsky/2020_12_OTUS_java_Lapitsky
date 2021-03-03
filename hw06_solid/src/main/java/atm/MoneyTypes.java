@@ -13,7 +13,6 @@ public enum MoneyTypes {
     Cash01(0.1),
     Cash005(0.05),
     Cash001(0.01);
-
     private double amount;
 
     /**

@@ -18,12 +18,12 @@ public class ATM implements ATMinteface{
      * @param r10 для 10
      */
     public ATM(int r5000, int r1000, int r500, int r100, int r50, int r10) {
-        atm.add(new Cash5000(r5000));
-        atm.add(new Cash1000(r1000));
-        atm.add(new Cash500(r500));
-        atm.add(new Cash100(r100));
-        atm.add(new Cash50(r50));
-        atm.add(new Cash10(r10));
+        atm.add(new Money(MoneyTypes.Cash5000, r5000));
+        atm.add(new Money(MoneyTypes.Cash1000, r1000));
+        atm.add(new Money(MoneyTypes.Cash500, r500));
+        atm.add(new Money(MoneyTypes.Cash100, r100));
+        atm.add(new Money(MoneyTypes.Cash50, r50));
+        atm.add(new Money(MoneyTypes.Cash10, r10));
     }
 
     /**

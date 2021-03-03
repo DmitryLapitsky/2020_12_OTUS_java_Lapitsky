@@ -4,30 +4,25 @@ public class Money implements MoneyInterface{
 
     private int numberOfBills;
 
+    private double type;
+
     /**
-     * загрузка количества банкнот (не сумма рублей)
+     * загрузка номинала банкнот и их количества (не сумма денег)
      *
      * @param numberOfBills количетво банкнот
      */
-    public Money(int numberOfBills) {
+    public Money(MoneyTypes moneyType, int numberOfBills) {
         this.numberOfBills = numberOfBills;
-        if (getType() == -1) {
-            throw new RuntimeException("инициализация валюты не прошла");
-        }
+        type = moneyType.getValue();
     }
 
     /**
-     * возвращает номинал банкнот текущего класса по его названию или возвращает ошибку), если название класса неверно
+     * возвращает номинал банкнот текущего класса
      *
      * @return номинал банкнот в формате double (вдруг понадобятся копейки)
      */
     public double getType() {
-        for (MoneyTypes moneyType : MoneyTypes.values()) {
-            if (this.getClass().getSimpleName().equals(moneyType.name())) {
-                return moneyType.getValue();
-            }
-        }
-        throw new RuntimeException("название класса " + this.getClass().getSimpleName() + " неверно");
+        return type;
     }
 
     /**
