@@ -6,7 +6,7 @@ import java.util.List;
 public class ATM {
 
     //массив количетва банкнот
-    private static List<Money> atm = new ArrayList<>();
+    private List<Money> atm = new ArrayList<>();
 
     /**
      * загрузка банкнот в банкомат (только бумажных банкнот)
