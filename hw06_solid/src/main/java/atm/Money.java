@@ -1,6 +1,6 @@
 package atm;
 
-public abstract class Money implements MoneyInterface{
+public class Money implements MoneyInterface{
 
     private int numberOfBills;
 

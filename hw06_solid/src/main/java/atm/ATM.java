@@ -3,7 +3,7 @@ package atm;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ATM {
+public class ATM implements ATMinteface{
 
     //массив количетва банкнот
     private List<Money> atm = new ArrayList<>();
@@ -38,6 +38,10 @@ public class ATM {
         return summ;
     }
 
+    /**
+     * выводит количество банкнот каждого номинала в виде списка
+     * @return количество банкнот каждого номинала в виде списка
+     */
     public List<Money> left(){
         return atm;
     }
