@@ -4,7 +4,7 @@ public class Money implements MoneyInterface{
 
     private int numberOfBills;
 
-    private double type;
+    private MoneyTypes type;
 
     /**
      * загрузка номинала банкнот и их количества (не сумма денег)
@@ -13,7 +13,7 @@ public class Money implements MoneyInterface{
      */
     public Money(MoneyTypes moneyType, int numberOfBills) {
         this.numberOfBills = numberOfBills;
-        type = moneyType.getValue();
+        type = moneyType;
     }
 
     /**
@@ -22,7 +22,7 @@ public class Money implements MoneyInterface{
      * @return номинал банкнот в формате double (вдруг понадобятся копейки)
      */
     public double getType() {
-        return type;
+        return type.getValue();
     }
 
     /**
