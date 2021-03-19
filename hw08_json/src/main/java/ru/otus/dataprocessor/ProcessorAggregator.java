@@ -3,6 +3,7 @@ package ru.otus.dataprocessor;
 import ru.otus.model.Measurement;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class ProcessorAggregator implements Processor {
 
@@ -11,16 +12,13 @@ public class ProcessorAggregator implements Processor {
         //группирует выходящий список по name, при этом суммирует поля value
         Map<String, Double> map = new TreeMap<>();
 
-
-
-        for (Measurement m : data) {
-            if (!map.keySet().contains(m.getName())) {
-                map.put(m.getName(), m.getValue());
+        data.forEach(el -> {
+            if (!map.containsKey(el.getName())) {
+                map.put(el.getName(), el.getValue());
             } else {
-                double summ = map.get(m.getName()) + m.getValue();
-                map.put(m.getName(), summ);
+                map.put(el.getName(), map.get(el.getName()) + el.getValue());
             }
-        }
+        });
         return map;
     }
 }
