@@ -20,13 +20,11 @@ class ProcessorTest {
     @Test
     @DisplayName("Из файла читается json, обрабатывается, результат сериализуется в строку")
     void processingTest(@TempDir Path tempDir) throws IOException {
-        System.out.println("tempDir\t" + tempDir);
 
         //given
         var inputDataFileName = Paths.get("src", "test","resources", "inputData.json").toFile().getPath();
         var outputDataFileName = "outputData.json";
         String fullOutputFilePath = String.format("%s%s%s", tempDir, File.separator, outputDataFileName);
-        System.out.println("fOutDir\t" + fullOutputFilePath);
 
         FileLoader loader = new FileLoader(inputDataFileName);
         var processor = new ProcessorAggregator();
