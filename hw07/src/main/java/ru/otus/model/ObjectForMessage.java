@@ -7,9 +7,6 @@ public class ObjectForMessage {
     private List<String> data;
 
     public List<String> getData() {
-        if(data == null){
-
-        }
         return data;
     }
 

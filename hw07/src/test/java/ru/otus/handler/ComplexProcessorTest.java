@@ -4,9 +4,7 @@ package ru.otus.handler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
-import org.mockito.Mock;
-import ru.otus.listener.ListenerHistory;
+import ru.otus.listener.HistoryListener;
 import ru.otus.model.Message;
 import ru.otus.listener.Listener;
 import ru.otus.processor.*;
@@ -14,18 +12,14 @@ import ru.otus.processor.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 class ComplexProcessorTest {
@@ -131,15 +125,4 @@ class ComplexProcessorTest {
         Thread.sleep(1000);
         assertDoesNotThrow(() -> new ProcessorEvenSecError().process(null));
     }
-
-    @Test
-    @DisplayName("Тестируем listenerHistory четной секунды")
-    void testListener() {
-        var message = new Message.Builder(1L).field11("fiel11").field12("field12").build();
-        ListenerHistory history = new ListenerHistory();
-        history.onUpdated(message, message);
-        message = new ProcessorSwapFields11_12().process(message);
-        Assertions.assertNotEquals(history.getHistory().get(0).get(0).toString(), message.toString());
-    }
-
 }

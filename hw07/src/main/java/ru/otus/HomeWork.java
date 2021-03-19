@@ -1,7 +1,7 @@
 package ru.otus;//package ru.otus;
 
 import ru.otus.handler.ComplexProcessor;
-import ru.otus.listener.ListenerHistory;
+import ru.otus.listener.HistoryListener;
 import ru.otus.listener.ListenerPrinter;
 import ru.otus.model.Message;
 import ru.otus.model.ObjectForMessage;
@@ -29,7 +29,7 @@ public class HomeWork {
         ComplexProcessor complexProcessor = new ComplexProcessor(processors, (ex) -> {});
         ListenerPrinter listenerPrinter = new ListenerPrinter();
         complexProcessor.addListener(listenerPrinter);
-        complexProcessor.addListener(new ListenerHistory());
+        complexProcessor.addListener(new HistoryListener());
 
         List<String> field13List = new ArrayList<>();
         field13List.add("field13");

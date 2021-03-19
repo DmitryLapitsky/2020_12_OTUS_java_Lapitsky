@@ -13,12 +13,9 @@ public class Message {
     private final String field9;
     private final String field10;
 
-    //***
     private final String field11;
     private final String field12;
     private final ObjectForMessage field13;
-    //***
-
     //todo: 1. Добавить поля field11 - field13 (для field13 используйте класс ObjectForMessage)
 
     private Message(long id, String field1, String field2, String field3, String field4, String field5, String field6, String field7, String field8, String field9, String field10, String field11, String field12, ObjectForMessage field13) {
@@ -41,6 +38,7 @@ public class Message {
     public long getId() {
         return id;
     }
+
 
 
         public String getField1 () {
@@ -177,6 +175,25 @@ public class Message {
             this.field13 = field13;
         }
 
+        public Builder copyBody(Message msg){
+            ObjectForMessage copyField13 = new ObjectForMessage();
+            copyField13.setData(msg.getField13().getData());
+            this.field1 = msg.field1;
+            this.field2 = msg.field2;
+            this.field3 = msg.field3;
+            this.field4 = msg.field4;
+            this.field5 = msg.field5;
+            this.field6 = msg.field6;
+            this.field7 = msg.field7;
+            this.field8 = msg.field8;
+            this.field9 = msg.field9;
+            this.field10 = msg.field10;
+            this.field11 = msg.field11;
+            this.field12 = msg.field12;
+            this.field13 = copyField13;
+            return this;
+        }
+
         public Builder field1(String field1) {
             this.field1 = field1;
             return this;
@@ -241,7 +258,7 @@ public class Message {
         }
 
         public Message build() {
-            return new Message(id, field1, field2, field3, field4, field5, field6, field7, field8, field9, field10, field11, field12, field13);
+            return new Message(this.id, field1, field2, field3, field4, field5, field6, field7, field8, field9, field10, field11, field12, field13);
         }
     }
 }
