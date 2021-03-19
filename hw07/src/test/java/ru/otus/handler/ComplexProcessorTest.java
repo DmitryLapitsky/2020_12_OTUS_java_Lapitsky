@@ -4,6 +4,7 @@ package ru.otus.handler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import ru.otus.listener.HistoryListener;
 import ru.otus.model.Message;
 import ru.otus.listener.Listener;
@@ -106,12 +107,15 @@ class ComplexProcessorTest {
 
     @Test
     @DisplayName("Тестируем ошибку четной секунды")
-    void evenSecException() throws ParseException, InterruptedException {
-//        var processor1 = mock(ProcessorEvenSecError.class);
-//        when(processor1.getTime()).thenReturn(2);
-//        processor1.process(null);
-//        assertThatExceptionOfType(DateTimeException.class).isThrownBy(() -> processor1.process(null));
-//        try by mock, but didnt find, how to check throw of the DateTimeException
+    void evenSecException() {
+        var processor1 = spy(ProcessorEvenSecError.class);
+        when(processor1.getTime()).thenReturn(2);
+        assertThatExceptionOfType(DateTimeException.class).isThrownBy(() -> processor1.process(null));
+    }
+
+    @Test
+    @DisplayName("Тестируем ошибку четной секунды 2")
+    void evenSecException2() throws InterruptedException {
         while (true) {
             if (Integer.parseInt(new SimpleDateFormat("ss").format(new Date())) % 2 == 0) {
                 break;
