@@ -18,6 +18,12 @@ public class Message {
     private final ObjectForMessage field13;
     //todo: 1. Добавить поля field11 - field13 (для field13 используйте класс ObjectForMessage)
 
+    public Message clone() {
+        ObjectForMessage copyField13 = new ObjectForMessage();
+        copyField13.setData(this.getField13().getData());
+        return new Message(this.id, this.field1, this.field2, this.field3, this.field4, this.field5, this.field6, this.field7, this.field7, this.field8, this.field9, this.field10, this.field11, copyField13);
+    }
+
     private Message(long id, String field1, String field2, String field3, String field4, String field5, String field6, String field7, String field8, String field9, String field10, String field11, String field12, ObjectForMessage field13) {
         this.id = id;
         this.field1 = field1;
@@ -40,56 +46,55 @@ public class Message {
     }
 
 
-
-        public String getField1 () {
+    public String getField1() {
         return field1;
     }
 
-        public String getField2 () {
+    public String getField2() {
         return field2;
     }
 
-        public String getField3 () {
+    public String getField3() {
         return field3;
     }
 
-        public String getField4 () {
+    public String getField4() {
         return field4;
     }
 
-        public String getField5 () {
+    public String getField5() {
         return field5;
     }
 
-        public String getField6 () {
+    public String getField6() {
         return field6;
     }
 
-        public String getField7 () {
+    public String getField7() {
         return field7;
     }
 
-        public String getField8 () {
+    public String getField8() {
         return field8;
     }
 
-        public String getField9 () {
+    public String getField9() {
         return field9;
     }
 
-        public String getField10 () {
+    public String getField10() {
         return field10;
     }
 
-        public String getField11 () {
+    public String getField11() {
         return field11;
     }
 
-        public String getField12 () {
+    public String getField12() {
         return field12;
     }
 
-        public ObjectForMessage getField13 () {
+    public ObjectForMessage getField13() {
         return field13;
     }
 
@@ -128,10 +133,9 @@ public class Message {
                 ", field10='" + field10 + '\'' +
                 ", field11='" + field11 + '\'' +
                 ", field12='" + field12 + '\'';
-        if(field13==null){
+        if (field13 == null) {
             return (message + ", field13='" + null + '\'' + '}');
-        }
-        else{
+        } else {
             return (message + ", field13='" + field13.getData() + '\'' + '}');
         }
     }
@@ -173,25 +177,6 @@ public class Message {
             this.field11 = field11;
             this.field12 = field12;
             this.field13 = field13;
-        }
-
-        public Builder copyBody(Message msg){
-            ObjectForMessage copyField13 = new ObjectForMessage();
-            copyField13.setData(msg.getField13().getData());
-            this.field1 = msg.field1;
-            this.field2 = msg.field2;
-            this.field3 = msg.field3;
-            this.field4 = msg.field4;
-            this.field5 = msg.field5;
-            this.field6 = msg.field6;
-            this.field7 = msg.field7;
-            this.field8 = msg.field8;
-            this.field9 = msg.field9;
-            this.field10 = msg.field10;
-            this.field11 = msg.field11;
-            this.field12 = msg.field12;
-            this.field13 = copyField13;
-            return this;
         }
 
         public Builder field1(String field1) {
@@ -248,10 +233,12 @@ public class Message {
             this.field11 = field11;
             return this;
         }
+
         public Builder field12(String field12) {
             this.field12 = field12;
             return this;
         }
+
         public Builder field13(ObjectForMessage field13) {
             this.field13 = field13;
             return this;

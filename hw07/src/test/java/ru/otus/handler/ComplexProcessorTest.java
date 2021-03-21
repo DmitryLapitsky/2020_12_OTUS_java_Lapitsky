@@ -1,26 +1,18 @@
 package ru.otus.handler;
 
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import ru.otus.listener.HistoryListener;
 import ru.otus.model.Message;
 import ru.otus.listener.Listener;
 import ru.otus.processor.*;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class ComplexProcessorTest {
@@ -111,22 +103,5 @@ class ComplexProcessorTest {
         var processor1 = spy(ProcessorEvenSecError.class);
         when(processor1.getTime()).thenReturn(2);
         assertThatExceptionOfType(DateTimeException.class).isThrownBy(() -> processor1.process(null));
-    }
-
-    @Test
-    @DisplayName("Тестируем ошибку четной секунды 2")
-    void evenSecException2() throws InterruptedException {
-        while (true) {
-            if (Integer.parseInt(new SimpleDateFormat("ss").format(new Date())) % 2 == 0) {
-                break;
-            }
-        }
-
-        DateTimeException exception = assertThrows(DateTimeException.class, () -> {
-            new ProcessorEvenSecError().process(null);
-        });
-        assertEquals("even second", exception.getMessage());
-        Thread.sleep(1000);
-        assertDoesNotThrow(() -> new ProcessorEvenSecError().process(null));
     }
 }
