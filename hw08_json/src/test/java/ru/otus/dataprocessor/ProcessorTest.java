@@ -6,9 +6,12 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -19,14 +22,15 @@ class ProcessorTest {
 
     @Test
     @DisplayName("Из файла читается json, обрабатывается, результат сериализуется в строку")
-    void processingTest(@TempDir Path tempDir) throws IOException {
+    void processingTest(@TempDir Path tempDir) throws IOException, URISyntaxException {
 
         //given
-        var inputDataFileName = Paths.get("src", "test","resources", "inputData.json").toFile().getPath();
+        var inputDataFileName = "inputData.json";
         var outputDataFileName = "outputData.json";
         String fullOutputFilePath = String.format("%s%s%s", tempDir, File.separator, outputDataFileName);
 
-        FileLoader loader = new FileLoader(inputDataFileName);
+        URL resource = getClass().getClassLoader().getResource(inputDataFileName);
+        FileLoader loader = new FileLoader(new File(Objects.requireNonNull(resource).toURI()).getAbsolutePath());
         var processor = new ProcessorAggregator();
         var serializer = new FileSerializer(fullOutputFilePath);
 
