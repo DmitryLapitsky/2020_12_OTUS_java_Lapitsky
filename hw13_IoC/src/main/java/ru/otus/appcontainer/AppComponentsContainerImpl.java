@@ -20,52 +20,54 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
         checkConfigClass(configClass);
 
         // You code here...
-        Map<Integer, Map<String, Method>> orders = new TreeMap<>();
+        //А точно мапа нужна? Не получится просто сложить все в список и отсортировать его в нужном порядке?
+        List<Method> methods = new ArrayList<>();
         //раскладываем методы по индексам/orders
         for (Method method : configClass.getMethods()) {
             if (method.isAnnotationPresent(AppComponent.class)) {
-                int order = method.getAnnotation(AppComponent.class).order();
-                if (orders.containsKey(order)) {
-                    orders.get(order).put(method.getName(), method);
-                } else {
-                    orders.put(order, new HashMap<>() {{
-                        put(method.getName(), method);
-                    }});
-                }
+                methods.add(method);
             }
         }
+        methods.sort(Comparator.comparingInt(o -> o.getAnnotation(AppComponent.class).order()));
         //поочередно запускаем методы, передавая в них необходимые параметры
         try {
-            for (Integer order : orders.keySet()) {
-                for (Map.Entry<String, Method> el : orders.get(order).entrySet()) {
-                    Method method = el.getValue();
-                    if (contains(method.getParameterTypes(), appComponentsByName.keySet())) {
-                        Class<?>[] argNeed = method.getParameterTypes();
-                        Object[] methodArgs = new Object[argNeed.length];
-                        for (int i = 0; i < methodArgs.length; i++) {
-                            methodArgs[i] = appComponentsByName.get(argNeed[i].getSimpleName().toLowerCase());
+            for (Method method : methods) {
+                if (contains(method.getParameterTypes())) {
+                    Class<?>[] argNeed = method.getParameterTypes();
+                    Object[] methodArgs = new Object[argNeed.length];
+                    for (int i = 0; i < methodArgs.length; i++) {
+                        for(Object ini : appComponents){
+                            if(Arrays.toString(ini.getClass().getInterfaces()).contains(argNeed[i].getName()) || ini.getClass().getName().equals(argNeed[i].getName())){
+                                methodArgs[i] = ini;
+                            }
                         }
-                        appComponents.add(method.invoke(configClass.getConstructor().newInstance(), methodArgs));
-                        appComponentsByName.put(method.getName().toLowerCase(), appComponents.get(appComponents.size() - 1));
                     }
+                    appComponents.add(method.invoke(configClass.getConstructor().newInstance(), methodArgs));
+                    appComponentsByName.put(method.getAnnotation(AppComponent.class).name(), appComponents.get(appComponents.size() - 1));
+                } else {
+                    throw new RuntimeException("no objects for method " + method.getName());
                 }
             }
         } catch (Exception e) {
-            System.out.println("error " + e);
+            throw new RuntimeException("Application start error " + e);
         }
     }
 
     /**
      * Проверяет, есть ли все необходимые экземпляры классов, чтобы передать их как параметры в метод
+     *
      * @param parameters параметры метода
-     * @param instances существующие объекты
      * @return возвращает true, если для метода есть все объекты, false - если нет
      */
-    private boolean contains(Class<?>[] parameters, Set<String> instances) {
+    private boolean contains(Class<?>[] parameters) {
         boolean contains = true;
         for (Class<?> param : parameters) {
-            for (String ini : instances) {
-                if (param.toString().toLowerCase().contains(ini.toLowerCase())) {
+            for (Object ini : appComponents) {
+                System.out.println(" }}}} " + param.getName() + " <> " + Arrays.toString(ini.getClass().getInterfaces()));
+                if (Arrays.toString(ini.getClass().getInterfaces()).contains(param.getName())) {
+                    contains = true;
+                    break;
+                } else if (ini.getClass().getName().equals(param.getName())) {
                     contains = true;
                     break;
                 } else {
@@ -84,11 +86,21 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
 
     @Override
     public <C> C getAppComponent(Class<C> componentClass) {
-        return (C) appComponents.get(appComponents.size() - 1);
+        for (Object component : appComponents) {
+            if (Arrays.toString(component.getClass().getInterfaces()).contains(componentClass.getName())) {
+                return (C) component;
+            } else if (component.getClass().getName().equals(componentClass.getName())) {
+                return (C) component;
+            }
+        }
+        throw new RuntimeException("no corresponding class " + componentClass.getName() + " in " + appComponents);
     }
 
     @Override
     public <C> C getAppComponent(String componentName) {
-        return (C) appComponents.get(appComponents.size() - 1);
+        if(appComponentsByName.containsKey(componentName)){
+            return (C) appComponentsByName.get(componentName);
+        }
+        throw new RuntimeException("no corresponding class " + componentName + " in " + appComponentsByName);
     }
 }
