@@ -20,7 +20,6 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
         checkConfigClass(configClass);
 
         // You code here...
-        //А точно мапа нужна? Не получится просто сложить все в список и отсортировать его в нужном порядке?
         List<Method> methods = new ArrayList<>();
         //раскладываем методы по индексам/orders
         for (Method method : configClass.getMethods()) {
