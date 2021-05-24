@@ -31,50 +31,26 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
         //поочередно запускаем методы, передавая в них необходимые параметры
         try {
             for (Method method : methods) {
-                if (contains(method.getParameterTypes())) {
-                    Class<?>[] argNeed = method.getParameterTypes();
-                    Object[] methodArgs = new Object[argNeed.length];
-                    for (int i = 0; i < methodArgs.length; i++) {
-                        for(Object ini : appComponents){
-                            if(Arrays.toString(ini.getClass().getInterfaces()).contains(argNeed[i].getName()) || ini.getClass().getName().equals(argNeed[i].getName())){
-                                methodArgs[i] = ini;
-                            }
+                Class<?>[] argNeed = method.getParameterTypes();
+                Object[] methodArgs = new Object[argNeed.length];
+                for (int i = 0; i < methodArgs.length; i++) {
+                    for (Object ini : appComponents) {
+                        if (argNeed[i].isAssignableFrom(ini.getClass())) {
+                            methodArgs[i] = ini;
                         }
                     }
-                    appComponents.add(method.invoke(configClass.getConstructor().newInstance(), methodArgs));
-                    appComponentsByName.put(method.getAnnotation(AppComponent.class).name(), appComponents.get(appComponents.size() - 1));
-                } else {
-                    throw new RuntimeException("no objects for method " + method.getName());
                 }
+                for (Object o : methodArgs) {
+                    if(o == null){
+                        throw new RuntimeException("no objects for method " + method.getName());
+                    }
+                }
+                appComponents.add(method.invoke(configClass.getConstructor().newInstance(), methodArgs));
+                appComponentsByName.put(method.getAnnotation(AppComponent.class).name(), appComponents.get(appComponents.size() - 1));
             }
         } catch (Exception e) {
             throw new RuntimeException("Application start error " + e);
         }
-    }
-
-    /**
-     * Проверяет, есть ли все необходимые экземпляры классов, чтобы передать их как параметры в метод
-     *
-     * @param parameters параметры метода
-     * @return возвращает true, если для метода есть все объекты, false - если нет
-     */
-    private boolean contains(Class<?>[] parameters) {
-        boolean contains = true;
-        for (Class<?> param : parameters) {
-            for (Object ini : appComponents) {
-                System.out.println(" }}}} " + param.getName() + " <> " + Arrays.toString(ini.getClass().getInterfaces()));
-                if (Arrays.toString(ini.getClass().getInterfaces()).contains(param.getName())) {
-                    contains = true;
-                    break;
-                } else if (ini.getClass().getName().equals(param.getName())) {
-                    contains = true;
-                    break;
-                } else {
-                    contains = false;
-                }
-            }
-        }
-        return contains;
     }
 
     private void checkConfigClass(Class<?> configClass) {
@@ -97,7 +73,7 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
 
     @Override
     public <C> C getAppComponent(String componentName) {
-        if(appComponentsByName.containsKey(componentName)){
+        if (appComponentsByName.containsKey(componentName)) {
             return (C) appComponentsByName.get(componentName);
         }
         throw new RuntimeException("no corresponding class " + componentName + " in " + appComponentsByName);
