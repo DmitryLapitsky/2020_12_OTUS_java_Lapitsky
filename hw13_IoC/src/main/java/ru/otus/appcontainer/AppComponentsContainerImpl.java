@@ -34,12 +34,9 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
                 Class<?>[] argNeed = method.getParameterTypes();
                 Object[] methodArgs = new Object[argNeed.length];
                 for (int i = 0; i < methodArgs.length; i++) {
-                    for (Object ini : appComponents) {
-                        if (argNeed[i].isAssignableFrom(ini.getClass())) {
-                            methodArgs[i] = ini;
-                        }
-                    }
+                    methodArgs[i] = getAppComponent(argNeed[i]);
                 }
+
                 for (Object o : methodArgs) {
                     if(o == null){
                         throw new RuntimeException("no objects for method " + method.getName());
