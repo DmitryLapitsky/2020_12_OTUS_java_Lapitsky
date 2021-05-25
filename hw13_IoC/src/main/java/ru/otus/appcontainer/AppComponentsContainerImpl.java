@@ -62,9 +62,7 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
     @Override
     public <C> C getAppComponent(Class<C> componentClass) {
         for (Object component : appComponents) {
-            if (Arrays.toString(component.getClass().getInterfaces()).contains(componentClass.getName())) {
-                return (C) component;
-            } else if (component.getClass().getName().equals(componentClass.getName())) {
+            if (componentClass.isAssignableFrom(component.getClass())) {
                 return (C) component;
             }
         }
