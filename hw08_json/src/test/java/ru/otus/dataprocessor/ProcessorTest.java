@@ -1,17 +1,17 @@
 package ru.otus.dataprocessor;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.stream.Stream;
+import java.util.Objects;
 
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -22,16 +22,15 @@ class ProcessorTest {
 
     @Test
     @DisplayName("Из файла читается json, обрабатывается, результат сериализуется в строку")
-    void processingTest(@TempDir Path tempDir) throws IOException {
-        System.out.println("tempDir\t" + tempDir);
+    void processingTest(@TempDir Path tempDir) throws IOException, URISyntaxException {
 
         //given
-        var inputDataFileName = "D:\\SelfLearn\\OTUS\\2020_12_OTUS_java_Lapitsky\\hw08_json\\src\\test\\resources\\inputData.json";// "inputData.json";
+        var inputDataFileName = "inputData.json";
         var outputDataFileName = "outputData.json";
         String fullOutputFilePath = String.format("%s%s%s", tempDir, File.separator, outputDataFileName);
-        System.out.println("fOutDir\t" + fullOutputFilePath);
 
-        FileLoader loader = new FileLoader(inputDataFileName);
+        URL resource = getClass().getClassLoader().getResource(inputDataFileName);
+        FileLoader loader = new FileLoader(new File(Objects.requireNonNull(resource).toURI()).getAbsolutePath());
         var processor = new ProcessorAggregator();
         var serializer = new FileSerializer(fullOutputFilePath);
 
