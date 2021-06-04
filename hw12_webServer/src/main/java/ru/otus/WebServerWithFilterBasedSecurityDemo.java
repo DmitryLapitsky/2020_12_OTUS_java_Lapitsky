@@ -1,7 +1,5 @@
 package ru.otus;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.hibernate.cfg.Configuration;
 import ru.otus.hibernate.core.repository.DataTemplateHibernate;
 import ru.otus.hibernate.core.repository.HibernateUtils;
@@ -20,26 +18,21 @@ import ru.otus.services.UserAuthServiceImpl;
 public class WebServerWithFilterBasedSecurityDemo {
     private static final int WEB_SERVER_PORT = 8080;
     private static final String TEMPLATES_DIR = "/templates/";
-
+    private static final String HIBERNATE_CFG_FILE = "hibernate.cfg.xml";
 
     public static void main(String[] args) throws Exception {
-        Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
         TemplateProcessor templateProcessor = new TemplateProcessorImpl(TEMPLATES_DIR);
         UserAuthService authService = new UserAuthServiceImpl();
-        var dbServiceClient = new WebServerWithFilterBasedSecurityDemo()
-                .configureHibernate("hibernate.cfg.xml");
+        var dbServiceClient = new WebServerWithFilterBasedSecurityDemo().configureHibernate();
 
         UsersWebServer usersWebServer = new UsersWebServerWithFilterBasedSecurity(WEB_SERVER_PORT,
-                authService, dbServiceClient, gson, templateProcessor);
+                authService, dbServiceClient, templateProcessor);
 
         usersWebServer.start();
         usersWebServer.join();
     }
 
-    DbServiceClientImpl configureHibernate(String hibernateConfig) {
-
-
-        final String HIBERNATE_CFG_FILE = hibernateConfig;
+    DbServiceClientImpl configureHibernate() {
         var configuration = new Configuration().configure(HIBERNATE_CFG_FILE);
         var sessionFactory = HibernateUtils.buildSessionFactory(
                 configuration,
@@ -49,7 +42,6 @@ public class WebServerWithFilterBasedSecurityDemo {
         );
         var transactionManager = new TransactionManagerHibernate(sessionFactory);
         var clientTemplate = new DataTemplateHibernate<>(Client.class);
-        var dbServiceClient = new DbServiceClientImpl(transactionManager, clientTemplate);
-        return dbServiceClient;
+        return new DbServiceClientImpl(transactionManager, clientTemplate);
     }
 }

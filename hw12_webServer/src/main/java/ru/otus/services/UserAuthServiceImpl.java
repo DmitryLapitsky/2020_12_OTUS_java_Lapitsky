@@ -2,11 +2,10 @@ package ru.otus.services;
 
 public class UserAuthServiceImpl implements UserAuthService {
 
-    private final String user = "admin";
-    private final String pwd = "pwd";
-
     @Override
     public boolean authenticate(String login, String password) {
+        String user = "admin";
+        String pwd = "pwd";
         return login.equals(user) && password.equals(pwd);
     }
 

@@ -17,8 +17,6 @@ public class ClientsServlet extends HttpServlet {
 
     private static final String USERS_PAGE_TEMPLATE = "clients.html";
     private static final String CLIENTS = "allClients";
-    private static final String PHONES = "allPhones";
-    private static final String ADDRESSES = "allAddresses";
 
     private final DbServiceClientImpl userDao;
     private final TemplateProcessor templateProcessor;
