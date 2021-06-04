@@ -2,11 +2,13 @@
 
 TODO
 Домашнее задание с webserver
-
+запуск hw12_webServer/src/main/java/ru/otus/HomeWork_WebServerWithFilterBasedSecurity.java
+для проверки hibernate hw12_webServer/src/main/java/ru/otus/hibernate/demo/Try_Hibernate.java
+настройки подключения hibernate в resources/hibernate.cfg.xml
 
 1)  Встроить веб-сервер в приложение из ДЗ про Hibernate ORM (или в пример из вебинара встроить ДЗ про Hibernate)
     встроено, в отдельном пакете hibernate 
-        done, настройки подключения hibernate в resources/hibernate.cfg.xml
+        done 
     (немного доработан проект hibernate: добавлены методы getPhones, getAddress и toString для корректной работы с freemarker шаблонизатором)
     Странность в том, что для получения, например, client.address, потребовался метод getAddress в классе Client, но вытаскиваемые данные
     соответствовали методу toString в классе Address (ru.otus.hibernate.crm.model), поэтому там убрал все-все, что создает idea по умолчанию

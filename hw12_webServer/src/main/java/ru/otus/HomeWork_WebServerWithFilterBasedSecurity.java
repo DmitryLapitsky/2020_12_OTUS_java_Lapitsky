@@ -15,7 +15,7 @@ import ru.otus.services.TemplateProcessorImpl;
 import ru.otus.services.UserAuthService;
 import ru.otus.services.UserAuthServiceImpl;
 
-public class WebServerWithFilterBasedSecurityDemo {
+public class HomeWork_WebServerWithFilterBasedSecurity {
     private static final int WEB_SERVER_PORT = 8080;
     private static final String TEMPLATES_DIR = "/templates/";
     private static final String HIBERNATE_CFG_FILE = "hibernate.cfg.xml";
@@ -23,7 +23,7 @@ public class WebServerWithFilterBasedSecurityDemo {
     public static void main(String[] args) throws Exception {
         TemplateProcessor templateProcessor = new TemplateProcessorImpl(TEMPLATES_DIR);
         UserAuthService authService = new UserAuthServiceImpl();
-        var dbServiceClient = new WebServerWithFilterBasedSecurityDemo().configureHibernate();
+        var dbServiceClient = new HomeWork_WebServerWithFilterBasedSecurity().configureHibernate();
 
         UsersWebServer usersWebServer = new UsersWebServerWithFilterBasedSecurity(WEB_SERVER_PORT,
                 authService, dbServiceClient, templateProcessor);
