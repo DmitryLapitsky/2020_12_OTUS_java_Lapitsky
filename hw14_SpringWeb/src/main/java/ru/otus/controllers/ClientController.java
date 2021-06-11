@@ -60,7 +60,6 @@ public class ClientController {
 
     @GetMapping("/api/v1/addclient")
     public String clientCreateView(Model model) {
-        List<PhoneDataSet> phones = new ArrayList<>();
         model.addAttribute("client", new Client());
         model.addAttribute("address", new Address());
         model.addAttribute("phone", new PhoneDataSet());
