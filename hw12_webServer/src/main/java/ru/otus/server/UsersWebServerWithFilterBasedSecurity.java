@@ -61,7 +61,7 @@ public class UsersWebServerWithFilterBasedSecurity implements UsersWebServer {
 
         HandlerList handlers = new HandlerList();
         handlers.addHandler(resourceHandler);
-        handlers.addHandler(applySecurity(servletContextHandler, "/clients","/clients/addClient"));
+        handlers.addHandler(applySecurity(servletContextHandler, "/clients","/api/v1/client"));
 
         server.setHandler(handlers);
     }
@@ -78,7 +78,7 @@ public class UsersWebServerWithFilterBasedSecurity implements UsersWebServer {
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
 //        servletContextHandler.addServlet(new ServletHolder(new LoginServlet(templateProcessor, authService)), "/index");
         servletContextHandler.addServlet(new ServletHolder(new ClientsServlet(templateProcessor, userDao)), "/clients");
-        servletContextHandler.addServlet(new ServletHolder(new NewClientServlet(templateProcessor, userDao)), "/clients/addClient");
+        servletContextHandler.addServlet(new ServletHolder(new NewClientServlet(templateProcessor, userDao)), "/api/v1/client");
         return servletContextHandler;
     }
 
