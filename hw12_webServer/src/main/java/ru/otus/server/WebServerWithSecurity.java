@@ -16,7 +16,7 @@ import ru.otus.servlet.*;
 
 import java.util.Arrays;
 
-public class UsersWebServerWithFilterBasedSecurity implements UsersWebServer {
+public class WebServerWithSecurity implements UsersWebServer {
 
     private static final String START_PAGE_NAME = "index.html";
     private static final String COMMON_RESOURCES_DIR = "static";
@@ -27,10 +27,10 @@ public class UsersWebServerWithFilterBasedSecurity implements UsersWebServer {
     protected final TemplateProcessor templateProcessor;
     private final Server server;
 
-    public UsersWebServerWithFilterBasedSecurity(int port,
-                                                 UserAuthService authService,
-                                                 DbServiceClientImpl userDao,
-                                                 TemplateProcessor templateProcessor) {
+    public WebServerWithSecurity(int port,
+                                 UserAuthService authService,
+                                 DbServiceClientImpl userDao,
+                                 TemplateProcessor templateProcessor) {
         this.userDao = userDao;
         this.templateProcessor = templateProcessor;
         server = new Server(port);

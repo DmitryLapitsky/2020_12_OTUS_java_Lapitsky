@@ -9,7 +9,7 @@ import ru.otus.hibernate.crm.model.Client;
 import ru.otus.hibernate.crm.model.PhoneDataSet;
 import ru.otus.hibernate.crm.service.DbServiceClientImpl;
 import ru.otus.server.UsersWebServer;
-import ru.otus.server.UsersWebServerWithFilterBasedSecurity;
+import ru.otus.server.WebServerWithSecurity;
 import ru.otus.services.TemplateProcessor;
 import ru.otus.services.TemplateProcessorImpl;
 import ru.otus.services.UserAuthService;
@@ -25,7 +25,7 @@ public class HomeWorkWebServerWithFilterBasedSecurity {
         UserAuthService authService = new UserAuthServiceImpl();
         var dbServiceClient = new HomeWorkWebServerWithFilterBasedSecurity().configureHibernate();
 
-        UsersWebServer usersWebServer = new UsersWebServerWithFilterBasedSecurity(WEB_SERVER_PORT,
+        UsersWebServer usersWebServer = new WebServerWithSecurity(WEB_SERVER_PORT,
                 authService, dbServiceClient, templateProcessor);
 
         usersWebServer.start();
