@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+app:
+  client-list-page:
+    msg: Привет мир!!!
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/demoDB2
+    username: postgres
+    password: postgre
+  flyway:
+    enabled: true
+    clean-on-validation-error: true
+
+logging:
+  level:
+    org.springframework.jdbc.core.JdbcTemplate: TRACE
