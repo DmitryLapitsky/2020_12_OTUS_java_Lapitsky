@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package ru.otus.protobuf.generated;
+
+option java_multiple_files = true;
+
+message FromClient {
+    int64 firstValue = 1;
+    int64 lastValue = 2;
+}
+
+message FromServer {
+    int64 responceValue = 1;
+}
+
+service RemoteService {
+    rpc requestNumbers(FromClient) returns (stream FromServer);
+}
