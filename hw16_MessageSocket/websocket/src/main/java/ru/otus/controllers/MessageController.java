@@ -21,7 +21,12 @@ import ru.otus.jdbc.crm.service.DBServiceAddress;
 import ru.otus.jdbc.crm.service.DBServiceClient;
 import ru.otus.jdbc.crm.service.DBServicePhone;
 import ru.otus.messagesystem.*;
-import ru.otus.messagesystem.client.*;
+import ru.otus.messagesystem.MessageSystem;
+import ru.otus.messagesystem.client.CallbackRegistry;
+import ru.otus.messagesystem.client.CallbackRegistryImpl;
+import ru.otus.messagesystem.client.MsClient;
+import ru.otus.messagesystem.client.MsClientImpl;
+import ru.otus.messagesystem.message.Message;
 import ru.otus.messagesystem.message.MessageType;
 
 
@@ -35,34 +40,42 @@ public class MessageController {
     private final DBServicePhone dbServicephone;
     private final DBServiceClient dbServiceClient;
     private final DBServiceAddress dbServiceAddress;
+    private final MessageSystem messageSystemDBToWeb;
+    private final MessageSystem messageSystemWebToDB;
 
     final String FRONTEND_SERVICE_CLIENT_NAME = "frontendService";
     final String DATABASE_SERVICE_CLIENT_NAME = "databaseService";
 
-    public MessageController(DBServicePhone dbServicephone, DBServiceClient dbServiceClient, DBServiceAddress dbServiceAddress) {
+    public MessageController(DBServicePhone dbServicephone, DBServiceClient dbServiceClient, DBServiceAddress dbServiceAddress,
+                             MessageSystem messageSystemDBToWeb, MessageSystem messageSystemWebToDB) {
         this.dbServicephone = dbServicephone;
         this.dbServiceClient = dbServiceClient;
         this.dbServiceAddress = dbServiceAddress;
+        this.messageSystemDBToWeb = messageSystemDBToWeb;
+        this.messageSystemWebToDB = messageSystemWebToDB;
     }
+
+    static long i = 0;
 
     @MessageMapping("/message")
     @SendTo("/topic/response")
     public List<MsgClient> getMessage(String fromServer) {
         try {
             JSONParser parser = new JSONParser();
-            JSONObject obj = (JSONObject)parser.parse(fromServer);
+            JSONObject obj = (JSONObject) parser.parse(fromServer);
             String name = (String) obj.get("name");
             String address = (String) obj.get("address");
             String phone1 = (String) obj.get("phone1");
             String phone2 = (String) obj.get("phone2");
             toDb(name, address, phone1, phone2);
-        }catch (Exception e){logger.info("not enough data provided {}", fromServer);}
+        } catch (Exception e) {
+            logger.info("not enough data provided {}", fromServer);
+        }
 
         return fromDB();
     }
 
-    public List<MsgClient> messaging(RequestHandler requestHandler) {
-        MessageSystem messageSystem = new MessageSystemImpl();
+    public List<MsgClient> messaging(MessageSystem messageSystem, RequestHandler requestHandler, long i) {
         CallbackRegistry callbackRegistry = new CallbackRegistryImpl();
 
         HandlersStore requestHandlerDatabaseStore = new HandlersStoreImpl();
@@ -70,32 +83,31 @@ public class MessageController {
                 MessageType.USER_DATA,
                 requestHandler);
         MsClient databaseMsClient = new MsClientImpl(
-                DATABASE_SERVICE_CLIENT_NAME,
-                messageSystem,
+                DATABASE_SERVICE_CLIENT_NAME + i,
+                messageSystemDBToWeb,
                 requestHandlerDatabaseStore,
                 callbackRegistry);
-        messageSystem.addClient(databaseMsClient);
+        messageSystemDBToWeb.addClient(databaseMsClient);
 
         HandlersStore requestHandlerFrontendStore = new HandlersStoreImpl();
         requestHandlerFrontendStore.addHandler(
                 MessageType.USER_DATA,
                 new ClientsResponseHandler(callbackRegistry));
         MsClient frontendMsClient = new MsClientImpl(
-                FRONTEND_SERVICE_CLIENT_NAME,
-                messageSystem,
+                FRONTEND_SERVICE_CLIENT_NAME + i,
+                messageSystemDBToWeb,
                 requestHandlerFrontendStore,
                 callbackRegistry);
 
         FrontendService frontendService = new FrontendServiceImpl(
                 frontendMsClient,
-                DATABASE_SERVICE_CLIENT_NAME);
-        messageSystem.addClient(frontendMsClient);
+                DATABASE_SERVICE_CLIENT_NAME + i);
+        messageSystemDBToWeb.addClient(frontendMsClient);
 
         final List<MsgClient>[] evenNumbers = new ArrayList[]{new ArrayList<>()};
         frontendService.getAllData(data -> evenNumbers[0] = data.getData().stream().collect(Collectors.toList()));
         try {
             Thread.sleep(100);
-            messageSystem.dispose();
         } catch (Exception e) {
             logger.error(e.toString());
         }
@@ -103,7 +115,7 @@ public class MessageController {
     }
 
     public void toDb(String name, String address, String phone1, String phone2) {
-        List<MsgClient> clients = messaging(new ClientRequestToInsertHandler(name, address, phone1, phone2));
+        List<MsgClient> clients = messaging(messageSystemWebToDB, new ClientRequestToInsertHandler(name, address, phone1, phone2), i++);
 
         String clientName = clients.get(0).getName();
         String clientAddress = clients.get(0).getAddress();
@@ -119,7 +131,7 @@ public class MessageController {
     }
 
     public List<MsgClient> fromDB() {
-        return messaging(new AllClientsRequestHandler(new DBServiceImpl(dbServiceClient)));
+        return messaging(messageSystemDBToWeb, new AllClientsRequestHandler(new DBServiceImpl(dbServiceClient)), i++);
     }
 
 }
