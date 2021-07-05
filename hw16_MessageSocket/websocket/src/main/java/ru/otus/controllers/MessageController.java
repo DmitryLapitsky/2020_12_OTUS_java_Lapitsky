@@ -1,5 +1,7 @@
 package ru.otus.controllers;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -45,15 +47,17 @@ public class MessageController {
 
     @MessageMapping("/message")
     @SendTo("/topic/response")
-    public List<MsgClient> getMessage(String[] fromServer) {
-        if (fromServer.length < 4) {
-            return fromDB();
-        }
-        String name = fromServer[0];
-        String add = fromServer[1];
-        String phone1 = fromServer[2];
-        String phone2 = fromServer[3];
-        toDb(name, add, phone1, phone2);
+    public List<MsgClient> getMessage(String fromServer) {
+        try {
+            JSONParser parser = new JSONParser();
+            JSONObject obj = (JSONObject)parser.parse(fromServer);
+            String name = (String) obj.get("name");
+            String address = (String) obj.get("address");
+            String phone1 = (String) obj.get("phone1");
+            String phone2 = (String) obj.get("phone2");
+            toDb(name, address, phone1, phone2);
+        }catch (Exception e){logger.info("not enough data provided {}", fromServer);}
+
         return fromDB();
     }
 
