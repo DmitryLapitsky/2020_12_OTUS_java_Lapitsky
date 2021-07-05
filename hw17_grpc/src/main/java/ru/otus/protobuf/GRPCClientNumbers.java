@@ -14,7 +14,7 @@ import java.util.concurrent.CountDownLatch;
 public class GRPCClientNumbers {
 
     private static final String SERVER_HOST = "localhost";
-    private static final int SERVER_PORT = 8191;
+    private static final int SERVER_PORT = 8192;
 
     public static void main(String[] args) throws InterruptedException {
         ManagedChannel channel = ManagedChannelBuilder.forAddress(SERVER_HOST, SERVER_PORT)
@@ -33,8 +33,8 @@ public class GRPCClientNumbers {
         stub.requestNumbers(FromClient.newBuilder().setFirstValue(1).setLastValue(30).build(), new StreamObserver<FromServer>() {
             @Override
             public void onNext(FromServer value) {
+                clientCounter.setServerValue(value.getResponceValue());
                 System.out.println("server newValue\t"+value.getResponceValue());
-                handleResponce(value, clientCounter);
             }
 
             @Override
@@ -52,11 +52,5 @@ public class GRPCClientNumbers {
         latch.await();
 
         channel.shutdown();
-    }
-
-    static void handleResponce(FromServer value, CurrentValue clientCounter){
-        int currentValue = clientCounter.getCurrentValue();
-        currentValue = currentValue + (int)value.getResponceValue() + 1;
-        clientCounter.setCurrentValue(currentValue);
     }
 }
