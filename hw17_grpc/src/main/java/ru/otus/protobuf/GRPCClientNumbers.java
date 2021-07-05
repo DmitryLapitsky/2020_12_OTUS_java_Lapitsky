@@ -22,13 +22,11 @@ public class GRPCClientNumbers {
                 .build();
 
         CountDownLatch latch = new CountDownLatch(1);
-        System.out.println("\n\n\nА теперь тоже самое, только асинхронно!!!\n\n");
         RemoteServiceGrpc.RemoteServiceStub stub = RemoteServiceGrpc.newStub(channel);
 
         CurrentValue clientCounter = new CurrentValue();
         Thread thread1 = new Thread(() -> clientCounter.action(50));
         thread1.start();
-        final boolean[] countStart = {false};
 
         stub.requestNumbers(FromClient.newBuilder().setFirstValue(1).setLastValue(30).build(), new StreamObserver<FromServer>() {
             @Override
