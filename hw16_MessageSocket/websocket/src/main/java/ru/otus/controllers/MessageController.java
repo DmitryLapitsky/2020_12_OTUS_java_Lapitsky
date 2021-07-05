@@ -21,7 +21,11 @@ import ru.otus.jdbc.crm.service.DBServiceAddress;
 import ru.otus.jdbc.crm.service.DBServiceClient;
 import ru.otus.jdbc.crm.service.DBServicePhone;
 import ru.otus.messagesystem.*;
-import ru.otus.messagesystem.client.*;
+import ru.otus.messagesystem.MessageSystem;
+import ru.otus.messagesystem.client.CallbackRegistry;
+import ru.otus.messagesystem.client.CallbackRegistryImpl;
+import ru.otus.messagesystem.client.MsClient;
+import ru.otus.messagesystem.client.MsClientImpl;
 import ru.otus.messagesystem.message.MessageType;
 
 
@@ -35,14 +39,16 @@ public class MessageController {
     private final DBServicePhone dbServicephone;
     private final DBServiceClient dbServiceClient;
     private final DBServiceAddress dbServiceAddress;
+    private final MessageSystem messageSystem;
 
     final String FRONTEND_SERVICE_CLIENT_NAME = "frontendService";
     final String DATABASE_SERVICE_CLIENT_NAME = "databaseService";
 
-    public MessageController(DBServicePhone dbServicephone, DBServiceClient dbServiceClient, DBServiceAddress dbServiceAddress) {
+    public MessageController(DBServicePhone dbServicephone, DBServiceClient dbServiceClient, DBServiceAddress dbServiceAddress, MessageSystem messageSystem) {
         this.dbServicephone = dbServicephone;
         this.dbServiceClient = dbServiceClient;
         this.dbServiceAddress = dbServiceAddress;
+        this.messageSystem = messageSystem;
     }
 
     @MessageMapping("/message")
@@ -62,7 +68,7 @@ public class MessageController {
     }
 
     public List<MsgClient> messaging(RequestHandler requestHandler) {
-        MessageSystem messageSystem = new MessageSystemImpl();
+//        MessageSystem messageSystem = new MessageSystemImpl();
         CallbackRegistry callbackRegistry = new CallbackRegistryImpl();
 
         HandlersStore requestHandlerDatabaseStore = new HandlersStoreImpl();

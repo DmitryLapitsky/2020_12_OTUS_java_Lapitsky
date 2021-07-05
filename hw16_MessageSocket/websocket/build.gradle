@@ -19,6 +19,7 @@ dependencies {
     implementation 'org.postgresql:postgresql'
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
 
 }
 
