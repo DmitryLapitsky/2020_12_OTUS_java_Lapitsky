@@ -7,7 +7,6 @@ sourceCompatibility = JavaVersion.VERSION_15
 targetCompatibility = JavaVersion.VERSION_15
 
 dependencies {
-    implementation project(':hw16_MessageSocket:MessageSystem')
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-websocket', version: '2.4.5'
     implementation group: 'org.webjars', name: 'webjars-locator-core', version: '0.35'
