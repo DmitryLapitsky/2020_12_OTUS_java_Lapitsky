@@ -9,7 +9,7 @@ public class CurrentValue {
 
     private final AtomicInteger currentValue = new AtomicInteger(0);
 
-    public void setServerValue(long serverValue){
+    public synchronized void setServerValue(long serverValue){
         this.serverValue = (int)serverValue;
     }
 
