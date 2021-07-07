@@ -26,7 +26,6 @@ import ru.otus.messagesystem.client.CallbackRegistry;
 import ru.otus.messagesystem.client.CallbackRegistryImpl;
 import ru.otus.messagesystem.client.MsClient;
 import ru.otus.messagesystem.client.MsClientImpl;
-import ru.otus.messagesystem.message.Message;
 import ru.otus.messagesystem.message.MessageType;
 
 
@@ -40,19 +39,17 @@ public class MessageController {
     private final DBServicePhone dbServicephone;
     private final DBServiceClient dbServiceClient;
     private final DBServiceAddress dbServiceAddress;
-    private final MessageSystem messageSystemDBToWeb;
-    private final MessageSystem messageSystemWebToDB;
+    private final MessageSystem messageSystem;
 
     final String FRONTEND_SERVICE_CLIENT_NAME = "frontendService";
     final String DATABASE_SERVICE_CLIENT_NAME = "databaseService";
 
     public MessageController(DBServicePhone dbServicephone, DBServiceClient dbServiceClient, DBServiceAddress dbServiceAddress,
-                             MessageSystem messageSystemDBToWeb, MessageSystem messageSystemWebToDB) {
+                             MessageSystem messageSystem) {
         this.dbServicephone = dbServicephone;
         this.dbServiceClient = dbServiceClient;
         this.dbServiceAddress = dbServiceAddress;
-        this.messageSystemDBToWeb = messageSystemDBToWeb;
-        this.messageSystemWebToDB = messageSystemWebToDB;
+        this.messageSystem = messageSystem;
     }
 
     static long i = 0;
@@ -84,10 +81,10 @@ public class MessageController {
                 requestHandler);
         MsClient databaseMsClient = new MsClientImpl(
                 DATABASE_SERVICE_CLIENT_NAME + i,
-                messageSystemDBToWeb,
+                this.messageSystem,
                 requestHandlerDatabaseStore,
                 callbackRegistry);
-        messageSystemDBToWeb.addClient(databaseMsClient);
+        this.messageSystem.addClient(databaseMsClient);
 
         HandlersStore requestHandlerFrontendStore = new HandlersStoreImpl();
         requestHandlerFrontendStore.addHandler(
@@ -95,27 +92,31 @@ public class MessageController {
                 new ClientsResponseHandler(callbackRegistry));
         MsClient frontendMsClient = new MsClientImpl(
                 FRONTEND_SERVICE_CLIENT_NAME + i,
-                messageSystemDBToWeb,
+                this.messageSystem,
                 requestHandlerFrontendStore,
                 callbackRegistry);
 
         FrontendService frontendService = new FrontendServiceImpl(
                 frontendMsClient,
                 DATABASE_SERVICE_CLIENT_NAME + i);
-        messageSystemDBToWeb.addClient(frontendMsClient);
+        this.messageSystem.addClient(frontendMsClient);
 
         final List<MsgClient>[] evenNumbers = new ArrayList[]{new ArrayList<>()};
-        frontendService.getAllData(data -> evenNumbers[0] = data.getData().stream().collect(Collectors.toList()));
+        frontendService.getAllData(data -> {
+            evenNumbers[0] = data.getData().stream().collect(Collectors.toList());
+            System.out.println(">>>>" + data.getData());
+        });
         try {
             Thread.sleep(100);
         } catch (Exception e) {
             logger.error(e.toString());
         }
+        System.out.println("evenNumbers[0]" + evenNumbers[0]);
         return evenNumbers[0];
     }
 
     public void toDb(String name, String address, String phone1, String phone2) {
-        List<MsgClient> clients = messaging(messageSystemWebToDB, new ClientRequestToInsertHandler(name, address, phone1, phone2), i++);
+        List<MsgClient> clients = messaging(messageSystem, new ClientRequestToInsertHandler(name, address, phone1, phone2), i++);
 
         String clientName = clients.get(0).getName();
         String clientAddress = clients.get(0).getAddress();
@@ -131,7 +132,7 @@ public class MessageController {
     }
 
     public List<MsgClient> fromDB() {
-        return messaging(messageSystemDBToWeb, new AllClientsRequestHandler(new DBServiceImpl(dbServiceClient)), i++);
+        return messaging(messageSystem, new AllClientsRequestHandler(new DBServiceImpl(dbServiceClient)), i++);
     }
 
 }
