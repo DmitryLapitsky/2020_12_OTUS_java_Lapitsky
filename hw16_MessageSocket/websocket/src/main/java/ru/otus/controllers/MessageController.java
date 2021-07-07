@@ -101,24 +101,18 @@ public class MessageController {
                 DATABASE_SERVICE_CLIENT_NAME + i);
         this.messageSystem.addClient(frontendMsClient);
 
-        final List<MsgClient>[] evenNumbers = new ArrayList[]{new ArrayList<>()};
-        frontendService.getAllData(data -> {
-            evenNumbers[0] = data.getData().stream().collect(Collectors.toList());
-            System.out.println(">>>>" + data.getData());
-        });
-        try {
-            Thread.sleep(100);
-        } catch (Exception e) {
-            logger.error(e.toString());
-        }
-        System.out.println("evenNumbers[0]" + evenNumbers[0]);
-        return evenNumbers[0];
+        final List<MsgClient>[] clients = new ArrayList[]{new ArrayList<>()};
+
+        frontendService.getAllData(data -> clients[0] = data.getData());
+        return clients[0];
     }
 
-    public void toDb(String name, String address, String phone1, String phone2) {
-        List<MsgClient> clients = messaging(messageSystem, new ClientRequestToInsertHandler(name, address, phone1, phone2), i++);
 
-        String clientName = clients.get(0).getName();
+
+    public void toDb(String name, String address, String phone1, String phone2) {
+        List<MsgClient> clients =messaging(messageSystem, new ClientRequestToInsertHandler(name, address, phone1, phone2), i++);
+
+                String clientName = clients.get(0).getName();
         String clientAddress = clients.get(0).getAddress();
         String[] clientPhones = clients.get(0).getPhones().toArray(new String[0]);
 
