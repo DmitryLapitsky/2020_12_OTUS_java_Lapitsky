@@ -40,16 +40,18 @@ public class MessageController {
     private final DBServiceClient dbServiceClient;
     private final DBServiceAddress dbServiceAddress;
     private final MessageSystem messageSystem;
+    private final MessageSystem messageSystem2;
 
     final String FRONTEND_SERVICE_CLIENT_NAME = "frontendService";
     final String DATABASE_SERVICE_CLIENT_NAME = "databaseService";
 
     public MessageController(DBServicePhone dbServicephone, DBServiceClient dbServiceClient, DBServiceAddress dbServiceAddress,
-                             MessageSystem messageSystem) {
+                             MessageSystem messageSystem, MessageSystem messageSystem2) {
         this.dbServicephone = dbServicephone;
         this.dbServiceClient = dbServiceClient;
         this.dbServiceAddress = dbServiceAddress;
         this.messageSystem = messageSystem;
+        this.messageSystem2 = messageSystem2;
     }
 
     static long i = 0;
@@ -101,9 +103,11 @@ public class MessageController {
                 DATABASE_SERVICE_CLIENT_NAME + i);
         this.messageSystem.addClient(frontendMsClient);
 
-        final List<MsgClient>[] clients = new ArrayList[]{new ArrayList<>()};
-
-        frontendService.getAllData(data -> clients[0] = data.getData());
+        final List<MsgClient>[] clients = new ArrayList[]{null};
+        frontendService.getAllData(data -> clients[0] = data.getData().stream().distinct().collect(Collectors.toList()));
+        while(clients[0]==null) {
+            System.out.println("waiting");
+        }
         return clients[0];
     }
 
@@ -112,7 +116,7 @@ public class MessageController {
     public void toDb(String name, String address, String phone1, String phone2) {
         List<MsgClient> clients =messaging(messageSystem, new ClientRequestToInsertHandler(name, address, phone1, phone2), i++);
 
-                String clientName = clients.get(0).getName();
+        String clientName = clients.get(0).getName();
         String clientAddress = clients.get(0).getAddress();
         String[] clientPhones = clients.get(0).getPhones().toArray(new String[0]);
 
