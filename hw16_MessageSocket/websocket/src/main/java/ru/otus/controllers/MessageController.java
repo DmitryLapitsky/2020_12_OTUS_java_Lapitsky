@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import ru.otus.jdbc.crm.model.Address;
 import ru.otus.jdbc.crm.model.Client;
@@ -40,25 +41,26 @@ public class MessageController {
     private final DBServiceClient dbServiceClient;
     private final DBServiceAddress dbServiceAddress;
     private final MessageSystem messageSystem;
-    private final MessageSystem messageSystem2;
 
     final String FRONTEND_SERVICE_CLIENT_NAME = "frontendService";
     final String DATABASE_SERVICE_CLIENT_NAME = "databaseService";
 
-    public MessageController(DBServicePhone dbServicephone, DBServiceClient dbServiceClient, DBServiceAddress dbServiceAddress,
-                             MessageSystem messageSystem, MessageSystem messageSystem2) {
+    private final SimpMessagingTemplate template;
+
+    public MessageController(SimpMessagingTemplate template, DBServicePhone dbServicephone, DBServiceClient dbServiceClient, DBServiceAddress dbServiceAddress,
+                             MessageSystem messageSystem) {
+        this.template = template;
         this.dbServicephone = dbServicephone;
         this.dbServiceClient = dbServiceClient;
         this.dbServiceAddress = dbServiceAddress;
         this.messageSystem = messageSystem;
-        this.messageSystem2 = messageSystem2;
     }
 
     static long i = 0;
 
     @MessageMapping("/message")
     @SendTo("/topic/response")
-    public List<MsgClient> getMessage(String fromServer) {
+    public void getMessage(String fromServer) {
         try {
             JSONParser parser = new JSONParser();
             JSONObject obj = (JSONObject) parser.parse(fromServer);
@@ -70,11 +72,10 @@ public class MessageController {
         } catch (Exception e) {
             logger.info("not enough data provided {}", fromServer);
         }
-
-        return fromDB();
+        fromDB();
     }
 
-    public List<MsgClient> messaging(MessageSystem messageSystem, RequestHandler requestHandler, long i) {
+    public List<MsgClient> messaging(RequestHandler requestHandler, long i, boolean toDb) {
         CallbackRegistry callbackRegistry = new CallbackRegistryImpl();
 
         HandlersStore requestHandlerDatabaseStore = new HandlersStoreImpl();
@@ -83,10 +84,10 @@ public class MessageController {
                 requestHandler);
         MsClient databaseMsClient = new MsClientImpl(
                 DATABASE_SERVICE_CLIENT_NAME + i,
-                this.messageSystem,
+                messageSystem,
                 requestHandlerDatabaseStore,
                 callbackRegistry);
-        this.messageSystem.addClient(databaseMsClient);
+        messageSystem.addClient(databaseMsClient);
 
         HandlersStore requestHandlerFrontendStore = new HandlersStoreImpl();
         requestHandlerFrontendStore.addHandler(
@@ -94,43 +95,50 @@ public class MessageController {
                 new ClientsResponseHandler(callbackRegistry));
         MsClient frontendMsClient = new MsClientImpl(
                 FRONTEND_SERVICE_CLIENT_NAME + i,
-                this.messageSystem,
+                messageSystem,
                 requestHandlerFrontendStore,
                 callbackRegistry);
 
         FrontendService frontendService = new FrontendServiceImpl(
                 frontendMsClient,
                 DATABASE_SERVICE_CLIENT_NAME + i);
-        this.messageSystem.addClient(frontendMsClient);
+        messageSystem.addClient(frontendMsClient);
 
         final List<MsgClient>[] clients = new ArrayList[]{null};
-        frontendService.getAllData(data -> clients[0] = data.getData().stream().distinct().collect(Collectors.toList()));
-        while(clients[0]==null) {
+        frontendService.getAllData(data -> {
+                    clients[0] = data.getData().stream().distinct().collect(Collectors.toList());
+                    if (!toDb) {
+                        System.out.println("sending to web from msg");
+                        template.convertAndSend("/topic/response", clients[0]);
+                    } else {
+                        String clientName = clients[0].get(0).getName();
+                        String clientAddress = clients[0].get(0).getAddress();
+                        String[] clientPhones = clients[0].get(0).getPhones().toArray(new String[0]);
+
+                        var savedClientId = dbServiceClient.saveClient(new Client(clientName, null, new HashSet<>()));
+
+                        /// создаем phone и address
+                        dbServiceAddress.saveAddress(new Address(clientAddress, savedClientId.getId()));
+                        for (String el : clientPhones) {
+                            dbServicephone.savePhone(new PhoneDataSet(el, savedClientId.getId()));
+                        }
+                        fromDB();
+                    }
+                }
+        );
+        while (clients[0] == null) {
             System.out.println("waiting");
         }
         return clients[0];
     }
 
 
-
     public void toDb(String name, String address, String phone1, String phone2) {
-        List<MsgClient> clients =messaging(messageSystem, new ClientRequestToInsertHandler(name, address, phone1, phone2), i++);
-
-        String clientName = clients.get(0).getName();
-        String clientAddress = clients.get(0).getAddress();
-        String[] clientPhones = clients.get(0).getPhones().toArray(new String[0]);
-
-        var savedClientId = dbServiceClient.saveClient(new Client(clientName, null, new HashSet<>()));
-
-        /// создаем phone и address
-        dbServiceAddress.saveAddress(new Address(clientAddress, savedClientId.getId()));
-        for (String el : clientPhones) {
-            dbServicephone.savePhone(new PhoneDataSet(el, savedClientId.getId()));
-        }
+        messaging(new ClientRequestToInsertHandler(name, address, phone1, phone2), i++, true);
     }
 
-    public List<MsgClient> fromDB() {
-        return messaging(messageSystem, new AllClientsRequestHandler(new DBServiceImpl(dbServiceClient)), i++);
+    public void fromDB() {
+        messaging(new AllClientsRequestHandler(new DBServiceImpl(dbServiceClient)), i++, false);
     }
 
 }
