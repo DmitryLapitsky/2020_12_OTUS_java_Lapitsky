@@ -75,7 +75,7 @@ public class MessageController {
         fromDB();
     }
 
-    public List<MsgClient> messaging(RequestHandler requestHandler, long i, boolean toDb) {
+    public void messaging(RequestHandler requestHandler, long i, boolean toDb) {
         CallbackRegistry callbackRegistry = new CallbackRegistryImpl();
 
         HandlersStore requestHandlerDatabaseStore = new HandlersStoreImpl();
@@ -126,10 +126,6 @@ public class MessageController {
                     }
                 }
         );
-        while (clients[0] == null) {
-            System.out.println("waiting");
-        }
-        return clients[0];
     }
 
 
