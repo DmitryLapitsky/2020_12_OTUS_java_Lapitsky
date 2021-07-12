@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.4.5'
+}
+
+sourceCompatibility = JavaVersion.VERSION_15
+targetCompatibility = JavaVersion.VERSION_15
+
+dependencies {
+
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-websocket', version: '2.4.5'
+    implementation group: 'org.webjars', name: 'webjars-locator-core', version: '0.35'
+    implementation group: 'org.webjars', name: 'sockjs-client', version: '1.1.2'
+    implementation group: 'org.webjars', name: 'stomp-websocket', version: '2.3.3'
+    implementation group: 'org.webjars', name: 'bootstrap', version: '4.3.1'
+
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.postgresql:postgresql'
+    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+
+    implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.with {
+        encoding = 'UTF-8'
+    }
+}

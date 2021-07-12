@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clients</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script type="text/JavaScript">
+let stompClient = null;
+
+function getAll() {
+    stompClient = Stomp.over(new SockJS('/gs-guide-websocket'));
+    stompClient.connect({}, (frame) => {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/response', (message) => document.getElementById("dataTable").innerHTML = showMessage(message, "All clients"));
+        stompClient.send("/app/message", {}, JSON.stringify([]))
+    });
+}
+
+function addCli () {
+    stompClient = Stomp.over(new SockJS('/gs-guide-websocket'));
+    stompClient.connect({}, (frame) => {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/response', (message) => document.getElementById("dataTable").innerHTML = showMessage(message, "new client"));
+        stompClient.send("/app/message", {}, JSON.stringify({name:$("#clientName").val(), address:$("#address").val(), phone1:$("#phone1").val(), phone2:$("#phone2").val()}))
+    });
+}
+
+function showMessage(message, info) {
+     var htm = info + '<table border="1"><tr><th>Name</th><th>Address</th><th>Phones</th></tr>'
+     htm = htm + JSON.parse(message.body).map(o => {return `<tr><td>${o.name}</td><td>${o.address}</td><td>${o.phones}</td></tr>`})
+     htm = htm + '</table>'
+     return htm
+}
+
+
+$(function () {
+    $("form").on('submit', (event) => {
+        event.preventDefault();
+    });
+    $("#addClient").click(addCli);
+    $("#showAll").click(getAll);
+});
+
+
+    </script>
+</head>
+<body>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+    enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+<div id="main-content" class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <form class="form-inline">
+                <div class="form-group">
+                    <table>
+                        <tr>
+                            <th><label for="clientName">new Client: </label></th>
+                        </tr>
+                        <tr>
+                            <td><label for="clientName">name:</label></td>
+                            <td><input type="text" id="clientName" class="form-control" placeholder="type a name..."
+                                       value="name"></td>
+                            <td><label for="address">address:</label></td>
+                            <td><input type="text" id="address" class="form-control" placeholder="type a address..."
+                                       value="address"></td>
+                            <td><label for="phone1">phone 1:</label></td>
+                            <td><input type="text" id="phone1" class="form-control" placeholder="type a phone1..."
+                                       value="mts"></td>
+                            <td><label for="phone2">phone 2:</label></td>
+                            <td><input type="text" id="phone2" class="form-control" placeholder="type a phone2..."
+                                       value="beeline"></td>
+                        </tr>
+                    </table>
+                </div>
+                <button id="addClient" class="btn btn-default" type="submit">add client</button>
+            </form>
+        </div>
+    </div>
+    <button id="showAll" class="btn btn-default" type="submit">ShowAll</button>
+    <div id="dataTable"></div>
+</div>
+</body>
+</html>
