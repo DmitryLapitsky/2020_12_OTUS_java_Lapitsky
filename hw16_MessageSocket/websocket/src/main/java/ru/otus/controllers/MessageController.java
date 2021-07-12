@@ -12,6 +12,7 @@ import ru.otus.jdbc.crm.model.Address;
 import ru.otus.jdbc.crm.model.Client;
 import ru.otus.jdbc.crm.model.PhoneDataSet;
 import ru.otus.messageImpl.back.DBServiceImpl;
+import ru.otus.messageImpl.back.handlers.ClientByIdRequestHandler;
 import ru.otus.messageImpl.back.handlers.ClientRequestToInsertHandler;
 import ru.otus.messageImpl.dto.MsgClient;
 import ru.otus.messageImpl.back.handlers.AllClientsRequestHandler;
@@ -61,6 +62,7 @@ public class MessageController {
     @MessageMapping("/message")
     @SendTo("/topic/response")
     public void getMessage(String fromServer) {
+        boolean newClient = false;
         try {
             JSONParser parser = new JSONParser();
             JSONObject obj = (JSONObject) parser.parse(fromServer);
@@ -69,13 +71,16 @@ public class MessageController {
             String phone1 = (String) obj.get("phone1");
             String phone2 = (String) obj.get("phone2");
             toDb(name, address, phone1, phone2);
+            newClient = true;
         } catch (Exception e) {
             logger.info("not enough data provided {}", fromServer);
         }
-        fromDB();
+        if (!newClient) {
+            fromDB(newClient, 0);
+        }
     }
 
-    public void messaging(RequestHandler requestHandler, long i, boolean toDb) {
+    public void messaging(RequestHandler requestHandler, long i, boolean toDb, boolean last) {
         CallbackRegistry callbackRegistry = new CallbackRegistryImpl();
 
         HandlersStore requestHandlerDatabaseStore = new HandlersStoreImpl();
@@ -108,9 +113,9 @@ public class MessageController {
         frontendService.getAllData(data -> {
                     clients[0] = data.getData().stream().distinct().collect(Collectors.toList());
                     if (!toDb) {
-                        System.out.println("sending to web from msg");
                         template.convertAndSend("/topic/response", clients[0]);
                     } else {
+                        System.out.println("adding to db");
                         String clientName = clients[0].get(0).getName();
                         String clientAddress = clients[0].get(0).getAddress();
                         String[] clientPhones = clients[0].get(0).getPhones().toArray(new String[0]);
@@ -122,19 +127,24 @@ public class MessageController {
                         for (String el : clientPhones) {
                             dbServicephone.savePhone(new PhoneDataSet(el, savedClientId.getId()));
                         }
-                        fromDB();
+                        fromDB(true, savedClientId.getId());
                     }
                 }
         );
+
     }
 
 
     public void toDb(String name, String address, String phone1, String phone2) {
-        messaging(new ClientRequestToInsertHandler(name, address, phone1, phone2), i++, true);
+        messaging(new ClientRequestToInsertHandler(name, address, phone1, phone2), i++, true, true);
     }
 
-    public void fromDB() {
-        messaging(new AllClientsRequestHandler(new DBServiceImpl(dbServiceClient)), i++, false);
+    public void fromDB(boolean last, long id) {
+        if (!last) {
+            messaging(new AllClientsRequestHandler(new DBServiceImpl(dbServiceClient)), i++, false, last);
+        } else {
+            messaging(new ClientByIdRequestHandler(new DBServiceImpl(dbServiceClient, id), id), i++, false, last);
+        }
     }
 
 }

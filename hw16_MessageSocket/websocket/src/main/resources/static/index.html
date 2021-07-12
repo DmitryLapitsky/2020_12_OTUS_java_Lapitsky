@@ -9,7 +9,7 @@
     <script type="text/JavaScript">
 let stompClient = null;
 
-function cnct() {
+function getAll() {
     stompClient = Stomp.over(new SockJS('/gs-guide-websocket'));
     stompClient.connect({}, (frame) => {
         console.log('Connected: ' + frame);
@@ -18,13 +18,20 @@ function cnct() {
     });
 }
 
-const sendMsg = () => stompClient.send("/app/message", {}, JSON.stringify({name:$("#clientName").val(), address:$("#address").val(), phone1:$("#phone1").val(), phone2:$("#phone2").val()}))
+function addCli () {
+    stompClient = Stomp.over(new SockJS('/gs-guide-websocket'));
+    stompClient.connect({}, (frame) => {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/response', (message) => document.getElementById("dataTable").innerHTML = showMessage(message));
+        stompClient.send("/app/message", {}, JSON.stringify({name:$("#clientName").val(), address:$("#address").val(), phone1:$("#phone1").val(), phone2:$("#phone2").val()}))
+    });
+}
 
 function showMessage(message) {
      var htm = '<table border="1"><tr><th>Name</th><th>Address</th><th>Phones</th></tr>'
      htm = htm + JSON.parse(message.body).map(o => {return `<tr><td>${o.name}</td><td>${o.address}</td><td>${o.phones}</td></tr>`})
      htm = htm + '</table>'
-     return htm.replaceAll(",,", "")
+     return htm
 }
 
 
@@ -32,13 +39,14 @@ $(function () {
     $("form").on('submit', (event) => {
         event.preventDefault();
     });
-    $("#send").click(sendMsg);
+    $("#addClient").click(addCli);
+    $("#showAll").click(getAll);
 });
 
 
     </script>
 </head>
-<body onload="cnct();">
+<body>
 <noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
     enabled. Please enable
     Javascript and reload this page!</h2></noscript>
@@ -53,20 +61,25 @@ $(function () {
                         </tr>
                         <tr>
                             <td><label for="clientName">name:</label></td>
-                            <td><input type="text" id="clientName" class="form-control" placeholder="type a name..." value="name"></td>
+                            <td><input type="text" id="clientName" class="form-control" placeholder="type a name..."
+                                       value="name"></td>
                             <td><label for="address">address:</label></td>
-                            <td><input type="text" id="address" class="form-control" placeholder="type a address..." value="address"></td>
+                            <td><input type="text" id="address" class="form-control" placeholder="type a address..."
+                                       value="address"></td>
                             <td><label for="phone1">phone 1:</label></td>
-                            <td><input type="text" id="phone1" class="form-control" placeholder="type a phone1..." value="mts"></td>
+                            <td><input type="text" id="phone1" class="form-control" placeholder="type a phone1..."
+                                       value="mts"></td>
                             <td><label for="phone2">phone 2:</label></td>
-                            <td><input type="text" id="phone2" class="form-control" placeholder="type a phone2..." value="beeline"></td>
+                            <td><input type="text" id="phone2" class="form-control" placeholder="type a phone2..."
+                                       value="beeline"></td>
                         </tr>
                     </table>
                 </div>
-                <button id="send" class="btn btn-default" type="submit">add client</button>
+                <button id="addClient" class="btn btn-default" type="submit">add client</button>
             </form>
         </div>
     </div>
+    <button id="showAll" class="btn btn-default" type="submit">ShowAll</button>
     <div id="dataTable"></div>
 </div>
 </body>
