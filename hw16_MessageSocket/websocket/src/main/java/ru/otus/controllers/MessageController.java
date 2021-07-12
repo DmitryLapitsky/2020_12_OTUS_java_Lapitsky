@@ -115,7 +115,6 @@ public class MessageController {
                     if (!toDb) {
                         template.convertAndSend("/topic/response", clients[0]);
                     } else {
-                        System.out.println("adding to db");
                         String clientName = clients[0].get(0).getName();
                         String clientAddress = clients[0].get(0).getAddress();
                         String[] clientPhones = clients[0].get(0).getPhones().toArray(new String[0]);
